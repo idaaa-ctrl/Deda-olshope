@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Daftar - Toko Kita</title>
+    <!-- Memuat Tailwind CSS melalui CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen font-sans">
+    
+    <!-- Container Utama -->
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md transition-all duration-300 my-8">
+
+        <!-- ================= FORM LOGIN ================= -->
+        <div id="loginForm">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">Selamat Datang</h2>
+            <p class="text-center text-gray-500 mb-6">Silakan login ke akun Anda</p>
+            
+            <form onsubmit="prosesLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2" for="loginEmail">Email</label>
+                    <input class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" id="loginEmail" type="email" placeholder="contoh@email.com" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2" for="loginPassword">Password</label>
+                    <input class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500" id="loginPassword" type="password" placeholder="********" required>
+                </div>
+                <div>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg w-full transition duration-200" type="submit">
+                        Masuk
+                    </button>
+                </div>
+                <p class="text-center text-sm text-gray-600 mt-6">
+                    Belum punya akun? 
+                    <button type="button" onclick="ubahForm('register')" class="text-blue-600 hover:text-blue-800 font-semibold focus:outline-none">
+                        Daftar di sini
+                    </button>
+                </p>
+            </form>
+        </div>
+
+        <!-- ================= FORM DAFTAR ================= -->
+        <div id="registerForm" class="hidden">
+            <h2 class="text-3xl font-bold text-center mb-2 text-gray-800">Buat Akun</h2>
+            <p class="text-center text-gray-500 mb-6">Lengkapi data di bawah ini</p>
+            
+            <form onsubmit="prosesDaftar(event)">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2" for="regNama">Nama Lengkap</label>
+                    <input class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500" id="regNama" type="text" placeholder="Nama Anda" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2" for="regEmail">Email</label>
+                    <input class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500" id="regEmail" type="email" placeholder="contoh@email.com" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-semibold mb-2" for="regPassword">Password</label>
+                    <input class="shadow-sm appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500" id="regPassword" type="password" placeholder="********" required>
+                </div>
+                <div>
+                    <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg w-full transition duration-200" type="submit">
+                        Daftar Sekarang
+                    </button>
+                </div>
+                <p class="text-center text-sm text-gray-600 mt-6">
+                    Sudah punya akun? 
+                    <button type="button" onclick="ubahForm('login')" class="text-green-600 hover:text-green-800 font-semibold focus:outline-none">
+                        Login di sini
+                    </button>
+                </p>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- ================= SCRIPT LOGIKA ================= -->
+    <script>
+        function ubahForm(jenisForm) {
+            const formLogin = document.getElementById('loginForm');
+            const formRegister = document.getElementById('registerForm');
+            
+            if (jenisForm === 'register') {
+                formLogin.classList.add('hidden');
+                formRegister.classList.remove('hidden');
+            } else {
+                formRegister.classList.add('hidden');
+                formLogin.classList.remove('hidden');
+            }
+        }
+
+        function prosesLogin(e) {
+            e.preventDefault(); 
+            const email = document.getElementById('loginEmail').value;
+            alert('Login berhasil untuk: ' + email);
+            window.location.href = 'katalog.html';
+        }
+
+        function prosesDaftar(e) {
+            e.preventDefault();
+            const nama = document.getElementById('regNama').value;
+            alert('Pendaftaran berhasil untuk: ' + nama + '. Silakan login!');
+            ubahForm('login');
+        }
+    </script>
+</body>
+</html>

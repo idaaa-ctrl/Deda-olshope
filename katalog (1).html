@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Toko - Ratusan Produk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+    <!-- NAVBAR -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600 flex items-center gap-2">
+                <i class="fa-solid fa-store"></i> Toko Kita
+            </h1>
+            <div class="flex items-center gap-4">
+                <a href="login.html" class="text-sm font-semibold text-gray-600 hover:text-blue-600 transition">
+                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                </a>
+                <div class="relative">
+                    <button class="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg font-semibold">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Keranjang</span>
+                        <span id="cartCount" class="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KONTEN UTAMA -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Filter & Pencarian -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-3xl font-extrabold text-gray-800">Daftar Produk Toko</h2>
+                <p class="text-gray-500 text-sm mt-1">Total produk tersedia: <span id="totalProdukInfo" class="font-bold text-blue-600">0</span> barang</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="text" id="searchInput" onkeyup="resetDanFilter()" placeholder="Cari nama barang..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-full sm:w-64">
+                <select id="categorySelect" onchange="resetDanFilter()" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                    <option value="Semua">Semua Kategori</option>
+                    <option value="Makanan">Makanan</option>
+                    <option value="Minuman">Minuman</option>
+                    <option value="Cemilan">Cemilan</option>
+                    <option value="Elektronik">Elektronik</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Grid Produk -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+
+        <!-- Pesan Kosong -->
+        <div id="noProductMessage" class="hidden text-center py-12 text-gray-500">
+            <i class="fa-solid fa-box-open text-5xl mb-3 text-gray-300"></i>
+            <p class="text-lg font-medium">Barang tidak ditemukan.</p>
+        </div>
+
+        <!-- NAVIGASI PAGINASI -->
+        <div class="flex justify-center items-center gap-2 mt-10" id="paginationContainer">
+            <button onclick="gantiHalaman(-1)" id="btnPrev" class="px-4 py-2 border rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-chevron-left"></i> SEBELUMNYA
+            </button>
+            <span id="pageInfo" class="text-sm font-semibold text-gray-700 px-4">Halaman 1 dari 1</span>
+            <button onclick="gantiHalaman(1)" id="btnNext" class="px-4 py-2 border rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                SELANJUTNYA <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+    </main>
+
+    <script>
+        // GENERATE DUMMY DATA 120 BARANG OTOMATIS
+        const dataProduk = [];
+        const daftarKategori = ["Makanan", "Minuman", "Cemilan", "Elektronik"];
+        
+        for (let i = 1; i <= 120; i++) {
+            const kat = daftarKategori[i % daftarKategori.length];
+            dataProduk.push({
+                id: i,
+                nama: `Produk Toko #${i} (${kat})`,
+                kategori: kat,
+                harga: (Math.floor(Math.random() * 40) + 2) * 5000,
+                gambar: `https://picsum.photos/seed/${i + 100}/400/300`,
+                stok: Math.floor(Math.random() * 50) + 1
+            });
+        }
+
+        let halamanSaatIni = 1;
+        const jumlahPerHalaman = 8;
+        let produkTersaring = [...dataProduk];
+        let jumlahKeranjang = 0;
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(angka);
+        }
+
+        function muatHalaman() {
+            const grid = document.getElementById('productGrid');
+            const noMsg = document.getElementById('noProductMessage');
+            grid.innerHTML = '';
+
+            const totalHalaman = Math.ceil(produkTersaring.length / jumlahPerHalaman) || 1;
+            
+            if (produkTersaring.length === 0) {
+                noMsg.classList.remove('hidden');
+                document.getElementById('paginationContainer').classList.add('hidden');
+                return;
+            } else {
+                noMsg.classList.add('hidden');
+                document.getElementById('paginationContainer').classList.remove('hidden');
+            }
+
+            const indeksMulai = (halamanSaatIni - 1) * jumlahPerHalaman;
+            const indeksSelesai = indeksMulai + jumlahPerHalaman;
+            const itemTampil = produkTersaring.slice(indeksMulai, indeksSelesai);
+
+            itemTampil.forEach(item => {
+                grid.innerHTML += `
+                    <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden border border-gray-100 flex flex-col justify-between">
+                        <div>
+                            <div class="h-44 w-full overflow-hidden relative">
+                                <img src="${item.gambar}" alt="${item.nama}" class="w-full h-full object-cover">
+                                <span class="absolute top-2 right-2 bg-white/90 text-xs font-bold text-gray-700 px-2 py-1 rounded">
+                                    ${item.kategori}
+                                </span>
+                            </div>
+                            <div class="p-4">
+                                <h3 class="font-bold text-gray-800 text-base">${item.nama}</h3>
+                                <p class="text-xs text-gray-500 mt-1">Stok: ${item.stok}</p>
+                                <p class="text-lg font-extrabold text-blue-600 mt-2">${formatRupiah(item.harga)}</p>
+                            </div>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <button onclick="tambahKeKeranjang()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg text-sm">
+                                + Tambah
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('pageInfo').innerText = `Halaman ${halamanSaatIni} dari ${totalHalaman}`;
+            document.getElementById('btnPrev').disabled = halamanSaatIni === 1;
+            document.getElementById('btnNext').disabled = halamanSaatIni === totalHalaman;
+            document.getElementById('totalProdukInfo').innerText = produkTersaring.length;
+        }
+
+        function resetDanFilter() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const kategori = document.getElementById('categorySelect').value;
+
+            produkTersaring = dataProduk.filter(item => {
+                const cocokNama = item.nama.toLowerCase().includes(keyword);
+                const cocokKategori = (kategori === "Semua") || (item.kategori === kategori);
+                return cocokNama && cocokKategori;
+            });
+
+            halamanSaatIni = 1;
+            muatHalaman();
+        }
+
+        function gantiHalaman(arah) {
+            halamanSaatIni += arah;
+            muatHalaman();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function tambahKeKeranjang() {
+            jumlahKeranjang++;
+            document.getElementById('cartCount').innerText = jumlahKeranjang;
+        }
+
+        window.onload = function() {
+            resetDanFilter();
+        };
+    </script>
+</body>
+</html>
